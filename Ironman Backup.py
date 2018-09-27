@@ -65,11 +65,11 @@ def currentGame():
                 return 'Hearts of Iron IV'
             elif p.name() == 'victoria2.exe' or p.name() == 'v2game.exe':
                 return 'Victoria II'
-        print('Please launch a game!'.center(100, '='))
+        print('Please launch a game!')
         return ''
     except:
-        print('It seems there was an issue detecting the game'.center(100, '*'))
-        return ''
+        print('Issue detecting the game, trying again.')
+        return currentGame()
 
 # Find most recently updated file
 def findNew(game):
