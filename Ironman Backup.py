@@ -78,10 +78,11 @@ def findNew(game):
     latestUpdate = 0.1
     saves = os.listdir(location+game+'\\save games')
     while i < len(saves):
-        update = os.path.getmtime(location+game+'\\save games\\'+saves[i])
-        if update > latestUpdate:
-            latestUpdate = update
-            latestUpdateIndex = i
+        if not os.path.isdir(location+game+'\\save games\\'+saves[i]):
+            update = os.path.getmtime(location+game+'\\save games\\'+saves[i])
+            if update > latestUpdate:
+                latestUpdate = update
+                latestUpdateIndex = i
         i = i + 1
     return saves[latestUpdateIndex]
 
