@@ -9,15 +9,13 @@ import re
 import psutil
 
 class Backup():
-    """Generates backups on a timer"""
+    """Generates backups"""
 
     def __init__(self):
         self.location = os.path.expanduser('~\\Documents\\Paradox Interactive\\')    # Location of the Paradox Interactive folder
         self.backupLocation = self.location + 'Ironman Backup\\'                     # Location of backup folder
         self.euSuffix = '_Backup'                                                    # To ignore _Backup eu4 files
         self.hoiTemp = '_temp'                                                       # To ignore _temp hoi4 files
-        self.timer = 5                                                               # Enter interval to save in MINUTES
-        self.ext = ''                                                                # Initialize variable for extensions
 
         print('Working in directory ' + self.location)
 

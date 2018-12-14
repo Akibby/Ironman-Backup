@@ -6,17 +6,13 @@ import threading
 from threading import Event
 from PyQt5.QtWidgets import QApplication, QTextEdit, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QComboBox
 from backup import Backup
-# from PyQt5.QtCore import *
-# from PyQt5.QtGui import *
-
-timer = 5
-
 
 class App(QWidget):
     """Main window class"""
 
     def __init__(self, backup):
         super(App, self).__init__()
+        self.timer = 5
         self.backup = backup
         self.isRunning = False
         self.exit = Event()
@@ -80,7 +76,7 @@ class App(QWidget):
             self.text.append(message)
             app.processEvents()
             if self.isRunning:
-                self.exit.wait(timer)
+                self.exit.wait(self.timer)
         self.t._stop
         self.text.append('Process stopped.')
         self.updateSSBtn(True)
