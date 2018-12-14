@@ -3,17 +3,21 @@
 
 import sys
 import threading
+import time
 from threading import Event
-from PyQt5.QtWidgets import QApplication, QTextEdit, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QComboBox
+from PyQt5.QtWidgets import QApplication, QTextEdit, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QMainWindow, QAction, QInputDialog, QLineEdit, QMessageBox
 from backup import Backup
 
-class App(QWidget):
+
+class App(QMainWindow):
     """Main window class"""
 
     def __init__(self, backup):
-        super(App, self).__init__()
+        super().__init__()
+
         self.timer = 300
         self.backup = backup
+        self.cWidget = QWidget(self)
         self.isRunning = False
         self.exit = Event()
         self.text = QTextEdit(self)
@@ -27,6 +31,15 @@ class App(QWidget):
 
     def initUI(self):
         """Initialize UI"""
+        mainMenu = self.menuBar()
+        fileMenu = mainMenu.addMenu('File')
+        timeMenu = QAction('Set Interval', self)
+        lastMenu = QAction('Load Last', self)
+        timeMenu.triggered.connect(self.setTimer)
+        lastMenu.triggered.connect(self.loadLast)
+        fileMenu.addAction(timeMenu)
+        fileMenu.addAction(lastMenu)
+
         self.vLayout.addWidget(self.text)
         self.hLayout.addWidget(self.ssBtn)
         self.hLayout.addWidget(self.ldBtn)
@@ -34,7 +47,8 @@ class App(QWidget):
         self.ssBtn.clicked.connect(self.updateSSBtn)
         self.ldBtn.clicked.connect(self.load)
 
-        self.setLayout(self.vLayout)
+        self.cWidget.setLayout(self.vLayout)
+        self.setCentralWidget(self.cWidget)
         self.setWindowTitle('Ironman Backup')
 
         self.show()
@@ -88,6 +102,51 @@ class App(QWidget):
 
         self.lw.show()
 
+    def setTimer(self):
+        """Set a the time interval for saves"""
+        newTime, i = QInputDialog.getInt(
+            self, "New Timer", "Enter a time in minutes", (self.timer/60), 1, 60, 1)
+        if i:
+            if self.timer != (newTime * 60):
+                self.timer = (newTime * 60)
+                if self.isRunning:
+                    self.ssBtn.click()
+                    time.sleep(.5)
+                    self.ssBtn.click()
+
+    def loadLast(self):
+        """Load the latest backup save for the current game"""
+        curGame = self.backup.currentGame()
+        if curGame == 'Issue detecting the game, trying again.':
+            self.loadLast()
+        elif curGame == 'Stellaris':
+            runList = self.backup.loadList(curGame)
+            if runList:
+                run = runList[0]
+                saveList = self.backup.loadList(curGame + '\\' + run)
+                if saveList:
+                    save = saveList[0]
+                    self.backup.stellarisLoad(curGame, run, save)
+                    QMessageBox.information(
+                        self, 'Load Last', 'The latest backup for ' + curGame + ' has been loaded.')
+                    return
+        elif curGame != '':
+            runList = self.backup.loadList(curGame)
+            if runList:
+                run = runList[0]
+                saveList = self.backup.loadList(curGame + '\\' + run)
+                if saveList:
+                    save = saveList[0]
+                    self.backup.genLoad(curGame, run, save)
+                    QMessageBox.information(
+                        self, 'Load Last', 'The latest backup for ' + curGame + ' has been loaded.')
+                    return
+        else:
+            QMessageBox.warning(self, 'Load Last',
+                                'A game must be running to use this feature.')
+            return
+        QMessageBox.warning(self, 'Load Last', curGame + ' has no backups.')
+
 
 class LoadWindow(QWidget):
     """Load window class"""
@@ -118,6 +177,8 @@ class LoadWindow(QWidget):
         vBox.addWidget(self.loadBtn)
         self.setLayout(vBox)
         self.gameSelect()
+        self.show()
+        self.focusWidget()
 
     def gameSelect(self):
         """Handle a game being selected"""
@@ -125,7 +186,6 @@ class LoadWindow(QWidget):
         self.runCB.clear()
         for run in runList:
             self.runCB.addItem(run)
-        self.show()
         self.runSelect()
 
     def runSelect(self):
@@ -135,7 +195,6 @@ class LoadWindow(QWidget):
         self.saveCB.clear()
         for save in saveList:
             self.saveCB.addItem(save)
-        self.show()
 
     def loadFile(self):
         """Load a file"""
