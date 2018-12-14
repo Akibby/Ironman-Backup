@@ -72,12 +72,27 @@ class Backup():
         return message
 
     def loadList(self, game):
-        """Return a list of all saves in a location"""
-        saves = os.listdir(self.backupLocation+game)
-        orderedSaves = []
-        for i in reversed(saves):
-            orderedSaves.append(i)
-        return orderedSaves
+        """Return a list of all files/folders in a location"""
+        if game != '':
+            i = 0
+            l = os.listdir(self.backupLocation+game)
+            while i < len(l):
+                index = i
+                update = os.path.getmtime(self.backupLocation+game+'\\'+l[i])
+                j = index + 1
+                while j < len(l):
+                    updateComp = os.path.getmtime(self.backupLocation+game+'\\'+l[j])
+                    if update < updateComp:
+                        index = j
+                    j += 1
+                moving = l[index]
+                l[index] = l[i]
+                l[i] = moving
+                i += 1
+            return l
+        else:
+            l = os.listdir(self.backupLocation+game)
+            return sorted(l)
 
     def genLoad(self, game, folder, filename):
         """Generic load"""
@@ -124,7 +139,7 @@ class Backup():
                 if update > latestUpdate:
                     latestUpdate = update
                     latestUpdateIndex = i
-            i = i + 1
+            i += 1
         return saves[latestUpdateIndex]
 
     def getEXT(self, game):

@@ -12,7 +12,7 @@ class App(QWidget):
 
     def __init__(self, backup):
         super(App, self).__init__()
-        self.timer = 5
+        self.timer = 300
         self.backup = backup
         self.isRunning = False
         self.exit = Event()
@@ -102,8 +102,7 @@ class LoadWindow(QWidget):
 
     def initUI(self):
         """Initialize UI"""
-        gameList = ['Crusader Kings II', 'Europa Universalis IV',
-                    'Hearts of Iron IV', 'Stellaris']
+        gameList = self.backup.loadList('')
         self.resize(250, 200)
         self.setWindowTitle('Saved Games')
 
