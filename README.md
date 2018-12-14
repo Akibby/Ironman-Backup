@@ -6,6 +6,6 @@ This is a GUI app that when run will generate backups on a timer. Previosly gene
 
 Before running the app open a cmd window and enter:
 
-    pip install -r "C:\Path\to\requirements.txt
+    pip install -r "C:\Path\to\requirements.txt"
 
 This will install dependencies.
