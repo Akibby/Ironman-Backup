@@ -2,10 +2,13 @@
 # pylint: disable=C0103
 
 import sys
-import threading
 import time
+import os
+import threading
 from threading import Event
+from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QApplication, QTextEdit, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QMainWindow, QAction, QInputDialog, QLineEdit, QMessageBox
+from PyQt5.QtGui import QIcon
 from backup import Backup
 
 
@@ -49,6 +52,7 @@ class App(QMainWindow):
 
         self.cWidget.setLayout(self.vLayout)
         self.setCentralWidget(self.cWidget)
+        self.setWindowIcon(QIcon('.\\res\\Ironman.png'))
         self.setWindowTitle('Ironman Backup')
 
         self.show()
