@@ -3,11 +3,9 @@
 
 import sys
 import time
-import os
 import threading
 from threading import Event
-from PyQt5.QtCore import QSize
-from PyQt5.QtWidgets import QApplication, QTextEdit, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QMainWindow, QAction, QInputDialog, QLineEdit, QMessageBox
+from PyQt5.QtWidgets import QApplication, QTextEdit, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QMainWindow, QAction, QInputDialog, QMessageBox
 from PyQt5.QtGui import QIcon
 from backup import Backup
 
@@ -29,6 +27,7 @@ class App(QMainWindow):
         self.ldBtn = QPushButton('Load')
         self.vLayout = QVBoxLayout()
         self.hLayout = QHBoxLayout()
+        self.curGame = ''
 
         self.initUI()
 
@@ -101,7 +100,7 @@ class App(QMainWindow):
 
     def load(self):
         """Open a load window"""
-        self.lw = LoadWindow(self.backup)
+        self.lw = LoadWindow(self.backup, self.curGame)
         self.lw.initUI()
 
         self.lw.show()
@@ -120,44 +119,46 @@ class App(QMainWindow):
 
     def loadLast(self):
         """Load the latest backup save for the current game"""
-        curGame = self.backup.currentGame()
-        if curGame == 'Issue detecting the game, trying again.':
+        self.curGame = self.backup.currentGame()
+        if self.curGame == 'Issue detecting the game, trying again.':
             self.loadLast()
-        elif curGame == 'Stellaris':
-            runList = self.backup.loadList(curGame)
+        elif self.curGame == 'Stellaris':
+            runList = self.backup.loadList(self.curGame)
             if runList:
                 run = runList[0]
-                saveList = self.backup.loadList(curGame + '\\' + run)
+                saveList = self.backup.loadList(self.curGame + '\\' + run)
                 if saveList:
                     save = saveList[0]
-                    self.backup.stellarisLoad(curGame, run, save)
+                    self.backup.stellarisLoad(self.curGame, run, save)
                     QMessageBox.information(
-                        self, 'Load Last', 'The latest backup for ' + curGame + ' has been loaded.')
+                        self, 'Load Last', 'The latest backup for ' + self.curGame + ' has been loaded.')
                     return
-        elif curGame != '':
-            runList = self.backup.loadList(curGame)
+        elif self.curGame != '':
+            runList = self.backup.loadList(self.curGame)
             if runList:
                 run = runList[0]
-                saveList = self.backup.loadList(curGame + '\\' + run)
+                saveList = self.backup.loadList(self.curGame + '\\' + run)
                 if saveList:
                     save = saveList[0]
-                    self.backup.genLoad(curGame, run, save)
+                    self.backup.genLoad(self.curGame, run, save)
                     QMessageBox.information(
-                        self, 'Load Last', 'The latest backup for ' + curGame + ' has been loaded.')
+                        self, 'Load Last', 'The latest backup for ' + self.curGame + ' has been loaded.')
                     return
         else:
             QMessageBox.warning(self, 'Load Last',
                                 'A game must be running to use this feature.')
             return
-        QMessageBox.warning(self, 'Load Last', curGame + ' has no backups.')
+        QMessageBox.warning(self, 'Load Last', self.curGame + ' has no backups.')
 
 
 class LoadWindow(QWidget):
     """Load window class"""
 
-    def __init__(self, backup):
+    def __init__(self, backup, curGame):
         QWidget.__init__(self)
         self.backup = backup
+        self.curGame = backup.currentGame()
+        self.gameList = backup.loadList('')
         self.gameCB = QComboBox(self)
         self.runCB = QComboBox(self)
         self.saveCB = QComboBox(self)
@@ -165,11 +166,10 @@ class LoadWindow(QWidget):
 
     def initUI(self):
         """Initialize UI"""
-        gameList = self.backup.loadList('')
         self.resize(250, 200)
         self.setWindowTitle('Saved Games')
 
-        for game in gameList:
+        for game in self.gameList:
             self.gameCB.addItem(game)
         self.gameCB.currentIndexChanged.connect(self.gameSelect)
         self.runCB.activated.connect(self.runSelect)
@@ -180,9 +180,15 @@ class LoadWindow(QWidget):
         vBox.addWidget(self.saveCB)
         vBox.addWidget(self.loadBtn)
         self.setLayout(vBox)
+        self.chooseFirst()
         self.gameSelect()
         self.show()
         self.focusWidget()
+
+    def chooseFirst(self):
+        """Set the current game as chosen"""
+        if self.curGame in self.gameList:
+            self.gameCB.setCurrentText(self.curGame)
 
     def gameSelect(self):
         """Handle a game being selected"""
