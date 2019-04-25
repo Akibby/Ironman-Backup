@@ -119,6 +119,8 @@ class Backup():
                     return 'Crusader Kings II'
                 elif p.name() == 'hoi4.exe':
                     return 'Hearts of Iron IV'
+                elif p.name() == 'imperator.exe':
+                    return 'Imperator'
                 elif p.name() == 'victoria2.exe' or p.name() == 'v2game.exe':
                     return 'Victoria II'
             print('Please launch a game!')
@@ -150,6 +152,8 @@ class Backup():
             return '.ck2'
         elif game == 'Hearts of Iron IV':
             return '.hoi4'
+        elif game == 'Imperator':
+            return '.rome'
         elif game == 'Victoria II':
             return '.v2'
         else:
