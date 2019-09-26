@@ -8,12 +8,13 @@ import datetime
 import re
 import psutil
 
+
 class Backup():
     """Generates backups"""
 
     def __init__(self):
-        self.location = os.path.expanduser('~\\Documents\\Paradox Interactive\\')    # Location of the Paradox Interactive folder
-        self.backupLocation = self.location + 'Ironman Backup\\'                     # Location of backup folder
+        self.location = os.path.expanduser('~/Documents/Paradox Interactive/')    # Location of the Paradox Interactive folder
+        self.backupLocation = self.location + 'Ironman Backup/'                     # Location of backup folder
         self.euSuffix = '_Backup'                                                    # To ignore _Backup eu4 files
         self.hoiTemp = '_temp'                                                       # To ignore _temp hoi4 files
 
@@ -24,14 +25,14 @@ class Backup():
         message = ''
         game = self.currentGame()
 
-        if not os.path.isdir(self.backupLocation+'\\'+game):
+        if not os.path.isdir(self.backupLocation+'/'+game):
             print('making '+self.backupLocation+game)
-            os.makedirs(self.backupLocation+'\\'+game)
+            os.makedirs(self.backupLocation+'/'+game)
             message += 'making '+self.backupLocation+game+'\n'
 
         if game == 'Stellaris':
             message += self.stellarisSave()
-        elif os.path.exists(self.location + game + '\\save games'):
+        elif os.path.exists(self.location + game + '/save games'):
             message += self.genSave(game)
         else:
             message += 'Please launch a game!'
@@ -44,12 +45,12 @@ class Backup():
         ext = self.getEXT(game)
         file = self.rmEXT(file, ext)
         if not file.endswith(self.euSuffix) and not file.endswith(self.hoiTemp) and ext != '':
-            if not os.path.exists(self.backupLocation+game+'\\'+file):
-                print('making ' + self.backupLocation+game+'\\'+file)
-                message += 'making ' + self.backupLocation+game+'\\'+file+'\n'
-                os.makedirs(self.backupLocation+game+'\\'+file)
-            shutil.copy(self.location+game+'\\save games\\'+file+ext,
-                        self.backupLocation+game+'\\'+file+'\\'+file+'-'+datetime.datetime.strftime(datetime.datetime.now(), '%d-%m-%y %H%M%S')+ext)
+            if not os.path.exists(self.backupLocation+game+'/'+file):
+                print('making ' + self.backupLocation+game+'/'+file)
+                message += 'making ' + self.backupLocation+game+'/'+file+'\n'
+                os.makedirs(self.backupLocation+game+'/'+file)
+            shutil.copy(self.location+game+'/save games/'+file+ext,
+                        self.backupLocation+game+'/'+file+'/'+file+'-'+datetime.datetime.strftime(datetime.datetime.now(), '%d-%m-%y %H%M%S')+ext)
             print(file+ext+' copied at ' +
                   datetime.datetime.strftime(datetime.datetime.now(), '%H:%M:%S'))
             message += file+ext+' copied at '+datetime.datetime.strftime(datetime.datetime.now(), '%H:%M:%S')
@@ -59,13 +60,13 @@ class Backup():
         """Save for Stellaris"""
         message = ''
         folder = self.findNew('Stellaris')
-        if os.path.exists(self.location+'Stellaris\\save games\\'+folder+'\\ironman.sav'):
-            if not os.path.isdir(self.backupLocation+'Stellaris\\'+folder):
-                print('making ' + self.backupLocation+'Stellaris\\'+folder)
-                message += 'making ' + self.backupLocation+'Stellaris\\'+folder
-                os.makedirs(self.backupLocation+'Stellaris\\'+folder)
-            shutil.copy(self.location+'Stellaris\\save games\\'+folder+'\\ironman.sav',
-                        self.backupLocation+'Stellaris\\'+folder+'\\ironman-'+datetime.datetime.strftime(datetime.datetime.now(), '%d-%m-%y %H%M%S') + '.sav')
+        if os.path.exists(self.location+'Stellaris/save games/'+folder+'/ironman.sav'):
+            if not os.path.isdir(self.backupLocation+'Stellaris/'+folder):
+                print('making ' + self.backupLocation+'Stellaris/'+folder)
+                message += 'making ' + self.backupLocation+'Stellaris/'+folder
+                os.makedirs(self.backupLocation+'Stellaris/'+folder)
+            shutil.copy(self.location+'Stellaris/save games/'+folder+'/ironman.sav',
+                        self.backupLocation+'Stellaris/'+folder+'/ironman-'+datetime.datetime.strftime(datetime.datetime.now(), '%d-%m-%y %H%M%S') + '.sav')
             print('ironman.sav copied at ' +
                   datetime.datetime.strftime(datetime.datetime.now(), '%H:%M:%S'))
             message += 'ironman.sav copied at '+datetime.datetime.strftime(datetime.datetime.now(), '%H:%M:%S')
@@ -74,22 +75,32 @@ class Backup():
     def loadList(self, game):
         """Return a list of all files/folders in a location"""
         if game != '':
-            i = 0
             l = os.listdir(self.backupLocation+game)
+            i = 0
             while i < len(l):
-                index = i
-                update = os.path.getmtime(self.backupLocation+game+'\\'+l[i])
-                j = index + 1
-                while j < len(l):
-                    updateComp = os.path.getmtime(self.backupLocation+game+'\\'+l[j])
-                    if update < updateComp:
-                        index = j
-                    j += 1
-                moving = l[index]
-                l[index] = l[i]
-                l[i] = moving
+                if l[i] == ".DS_Store":
+                    del l[i]
+                    break
                 i += 1
-            return l
+            if game.__contains__("/") or game.__contains__("\\"):
+                print("Run is " + game)
+                return list(reversed(sorted(l)))
+            else:
+                i = 0
+                while i < len(l):
+                    index = i
+                    update = os.path.getmtime(self.backupLocation+game+'/'+l[i])
+                    j = index + 1
+                    while j < len(l):
+                        updateComp = os.path.getmtime(self.backupLocation+game+'/'+l[j])
+                        if update < updateComp:
+                            index = j
+                        j += 1
+                    moving = l[index]
+                    l[index] = l[i]
+                    l[i] = moving
+                    i += 1
+                return l
         else:
             l = os.listdir(self.backupLocation+game)
             return sorted(l)
@@ -97,14 +108,14 @@ class Backup():
     def genLoad(self, game, folder, filename):
         """Generic load"""
         cut = re.sub(r'-\d\d-\d\d-\d\d\s\d{6}', '', filename)
-        shutil.copy(self.backupLocation+game+'\\'+folder+'\\'+filename,
-                    self.location+game+'\\save games\\'+cut)
+        shutil.copy(self.backupLocation+game+'/'+folder+'/'+filename,
+                    self.location+game+'/save games/'+cut)
 
     def stellarisLoad(self, game, folder, filename):
         """Stellaris load"""
         cut = re.sub(r'-\d\d-\d\d-\d\d\s\d{6}', '', filename)
-        shutil.copy(self.backupLocation+game+'\\'+folder+'\\'+filename,
-                    self.location+game+'\\save games\\'+folder+'\\'+cut)
+        shutil.copy(self.backupLocation+game+'/'+folder+'/'+filename,
+                    self.location+game+'/save games/'+folder+'/'+cut)
 
     def currentGame(self):
         """Find what game is currently running"""
@@ -113,9 +124,9 @@ class Backup():
                 p = psutil.Process(pid)
                 if p.name() == 'stellaris.exe':
                     return "Stellaris"
-                elif p.name() == 'eu4.exe':
+                elif p.name() == 'eu4':
                     return 'Europa Universalis IV'
-                elif p.name() == 'CK2game.exe':
+                elif p.name() == 'ck2':
                     return 'Crusader Kings II'
                 elif p.name() == 'hoi4.exe':
                     return 'Hearts of Iron IV'
@@ -134,10 +145,10 @@ class Backup():
         i = 0
         latestUpdateIndex = 0
         latestUpdate = 0.1
-        saves = os.listdir(self.location+game+'\\save games')
+        saves = os.listdir(self.location+game+'/save games')
         while i < len(saves):
-            if not os.path.isdir(self.location+game+'\\save games\\'+saves[i]) or game == 'Stellaris':
-                update = os.path.getmtime(self.location+game+'\\save games\\'+saves[i])
+            if not os.path.isdir(self.location+game+'/save games/'+saves[i]) or game == 'Stellaris':
+                update = os.path.getmtime(self.location+game+'/save games/'+saves[i])
                 if update > latestUpdate:
                     latestUpdate = update
                     latestUpdateIndex = i

@@ -51,7 +51,7 @@ class App(QMainWindow):
 
         self.cWidget.setLayout(self.vLayout)
         self.setCentralWidget(self.cWidget)
-        self.setWindowIcon(QIcon('.\\res\\Ironman.png'))
+        self.setWindowIcon(QIcon("./res/Ironman.png"))
         self.setWindowTitle('Ironman Backup')
 
         self.show()
@@ -126,7 +126,7 @@ class App(QMainWindow):
             runList = self.backup.loadList(self.curGame)
             if runList:
                 run = runList[0]
-                saveList = self.backup.loadList(self.curGame + '\\' + run)
+                saveList = self.backup.loadList(self.curGame + '/' + run)
                 if saveList:
                     save = saveList[0]
                     self.backup.stellarisLoad(self.curGame, run, save)
@@ -137,7 +137,7 @@ class App(QMainWindow):
             runList = self.backup.loadList(self.curGame)
             if runList:
                 run = runList[0]
-                saveList = self.backup.loadList(self.curGame + '\\' + run)
+                saveList = self.backup.loadList(self.curGame + '/' + run)
                 if saveList:
                     save = saveList[0]
                     self.backup.genLoad(self.curGame, run, save)
@@ -170,7 +170,8 @@ class LoadWindow(QWidget):
         self.setWindowTitle('Saved Games')
 
         for game in self.gameList:
-            self.gameCB.addItem(game)
+            if game != ".DS_Store":
+                self.gameCB.addItem(game)
         self.gameCB.currentIndexChanged.connect(self.gameSelect)
         self.runCB.activated.connect(self.runSelect)
         self.loadBtn.clicked.connect(self.loadFile)
@@ -201,7 +202,7 @@ class LoadWindow(QWidget):
     def runSelect(self):
         """Handle a run being selected"""
         run = self.runCB.currentText()
-        saveList = self.backup.loadList(self.gameCB.currentText() + '\\' + run)
+        saveList = self.backup.loadList(self.gameCB.currentText() + '/' + run)
         self.saveCB.clear()
         for save in saveList:
             self.saveCB.addItem(save)
