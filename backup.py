@@ -74,22 +74,18 @@ class Backup():
     def loadList(self, game):
         """Return a list of all files/folders in a location"""
         if game != '':
-            i = 0
-            l = os.listdir(self.backupLocation+game)
-            while i < len(l):
-                index = i
-                update = os.path.getmtime(self.backupLocation+game+'\\'+l[i])
-                j = index + 1
-                while j < len(l):
-                    updateComp = os.path.getmtime(self.backupLocation+game+'\\'+l[j])
-                    if update < updateComp:
-                        index = j
-                    j += 1
-                moving = l[index]
-                l[index] = l[i]
-                l[i] = moving
-                i += 1
-            return l
+            # l = os.listdir(self.backupLocation+game)
+            rundict = {}
+            for folder in os.listdir(self.backupLocation+game):
+                rundict[folder] = os.path.getmtime(self.backupLocation+game+'/'+folder)
+            print(rundict.items())
+            l = reversed(sorted(rundict, key=rundict.get))
+            print(l)
+            if game.__contains__("/") or game.__contains__("\\"):
+                print("Run is " + game)
+                return list(reversed(sorted(l)))
+            else:
+                return l
         else:
             l = os.listdir(self.backupLocation+game)
             return sorted(l)
