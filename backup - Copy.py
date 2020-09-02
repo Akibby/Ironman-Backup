@@ -74,17 +74,22 @@ class Backup():
     def loadList(self, game):
         """Return a list of all files/folders in a location"""
         if game != '':
-            # l = os.listdir(self.backupLocation+game)
-            rundict = {}
-            for folder in os.listdir(self.backupLocation+game):
-                rundict[folder] = os.path.getmtime(self.backupLocation+game+'/'+folder)
-            print(rundict.items())
-            l = list(reversed(sorted(rundict, key=rundict.get)))
-            if game.__contains__("/") or game.__contains__("\\"):
-                print("Run is " + game)
-                return list(reversed(sorted(l)))
-            else:
-                return l
+            i = 0
+            l = os.listdir(self.backupLocation+game)
+            while i < len(l):
+                index = i
+                update = os.path.getmtime(self.backupLocation+game+'\\'+l[i])
+                j = index + 1
+                while j < len(l):
+                    updateComp = os.path.getmtime(self.backupLocation+game+'\\'+l[j])
+                    if update < updateComp:
+                        index = j
+                    j += 1
+                moving = l[index]
+                l[index] = l[i]
+                l[i] = moving
+                i += 1
+            return l
         else:
             l = os.listdir(self.backupLocation+game)
             return sorted(l)
@@ -110,8 +115,6 @@ class Backup():
                     return "Stellaris"
                 elif p.name() == 'eu4.exe':
                     return 'Europa Universalis IV'
-                elif p.name() == 'ck3.exe':
-                    return 'Crusader Kings III'
                 elif p.name() == 'CK2game.exe':
                     return 'Crusader Kings II'
                 elif p.name() == 'hoi4.exe':
@@ -145,8 +148,6 @@ class Backup():
         """Grab return extension"""
         if game == 'Europa Universalis IV':
             return '.eu4'
-        elif game == 'Crusader Kings III':
-            return '.ck3'
         elif game == 'Crusader Kings II':
             return '.ck2'
         elif game == 'Hearts of Iron IV':
