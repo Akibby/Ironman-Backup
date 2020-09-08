@@ -180,6 +180,7 @@ class LoadWindow(QWidget):
         vBox.addWidget(self.saveCB)
         vBox.addWidget(self.loadBtn)
         self.setLayout(vBox)
+        self.setWindowIcon(QIcon('.\\res\\Ironman.png'))
         self.chooseFirst()
         self.gameSelect()
         self.show()
@@ -216,6 +217,8 @@ class LoadWindow(QWidget):
                 self.backup.stellarisLoad(self.gameCB.currentText(
                 ), self.runCB.currentText(), self.saveCB.currentText())
             self.close()
+            QMessageBox.information(
+                self, 'Load Last', 'The backup '+ self.saveCB.currentText() + ' for ' + self.gameCB.currentText() + ' has been loaded.')
 
 
 if __name__ == "__main__":
