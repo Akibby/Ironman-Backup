@@ -28,7 +28,7 @@ class App(QMainWindow):
         self.vLayout = QVBoxLayout()
         self.hLayout = QHBoxLayout()
         self.curGame = ''
-        self.cwd = '' # Custom/Current Working Directory (for users with a non-default file location such as another drive.)
+        self.cwd = '' # Custom/Current Working Directory (for users with a non-default file location such as a D: drive.)
 
         self.initUI()
 
@@ -40,7 +40,6 @@ class App(QMainWindow):
         cdirMenu = QAction('Set Directory', self)
         lastMenu = QAction('Load Last', self)
         timeMenu.triggered.connect(self.setTimer)
-        cdirMenu.triggered.connect(self.setDirectory)
         lastMenu.triggered.connect(self.loadLast)
         fileMenu.addAction(timeMenu)
         fileMenu.addAction(cdirMenu)
@@ -124,7 +123,7 @@ class App(QMainWindow):
     def setDirectory(self):
         """Set the current working directory."""
         newDir, i = QInputDialog.getText(
-            self, "Current Working Directory", "", QLineEdit.Normal, self.cwd)
+            self, "Current Working Directory", "", QLineEdit.Normal, self.cwd) # Check the docs
         if i:
             if self.cwd != newDir:
                 self.cwd = newDir
