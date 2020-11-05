@@ -3,10 +3,13 @@
 # pylint: disable=C0301
 
 import os
+import re
+import time
+import psutil
 import shutil
 import datetime
-import re
-import psutil
+
+from psutil import Process
 
 class Backup():
     """Generates backups"""
@@ -23,11 +26,12 @@ class Backup():
         """Finds game to be saved"""
         message = ''
         game = self.currentGame()
+        print(game)
 
-        if not os.path.isdir(self.backupLocation+'\\'+game):
-            print('making '+self.backupLocation+game)
-            os.makedirs(self.backupLocation+'\\'+game)
-            message += 'making '+self.backupLocation+game+'\n'
+        if not os.path.isdir(self.backupLocation + '\\' + game):
+            print('Making ' + self.backupLocation + game)
+            os.makedirs(self.backupLocation + '\\' + game)
+            message += 'Making ' + self.backupLocation + game + '\n'
 
         if game == 'Stellaris':
             message += self.stellarisSave()
@@ -102,29 +106,39 @@ class Backup():
                     self.location+game+'\\save games\\'+folder+'\\'+cut)
 
     def currentGame(self):
-        """Find what game is currently running"""
-        try:
-            for pid in psutil.pids():
-                p = psutil.Process(pid)
-                if p.name() == 'stellaris.exe':
+        """Find which game is currently running."""
+         # According to psutils docs, this is a preferable method.
+        iter = psutil.process_iter()
+        for proc in iter:
+            try:
+                if proc.name() == 'stellaris.exe':
                     return "Stellaris"
-                elif p.name() == 'eu4.exe':
+                elif proc.name() == 'eu4.exe':
                     return 'Europa Universalis IV'
-                elif p.name() == 'ck3.exe':
+                elif proc.name() == 'ck3.exe':
                     return 'Crusader Kings III'
-                elif p.name() == 'CK2game.exe':
+                elif proc.name() == 'CK2game.exe':
                     return 'Crusader Kings II'
-                elif p.name() == 'hoi4.exe':
+                elif proc.name() == 'hoi4.exe':
                     return 'Hearts of Iron IV'
-                elif p.name() == 'imperator.exe':
+                elif proc.name() == 'imperator.exe':
                     return 'Imperator'
-                elif p.name() == 'victoria2.exe' or p.name() == 'v2game.exe':
+                elif proc.name() == 'victoria2.exe' or proc.name() == 'v2game.exe':
                     return 'Victoria II'
-            print('Please launch a game!')
-            return ''
-        except:
-            print('Issue detecting the game, trying again.')
-            return self.currentGame()
+                continue
+            except psutil.AccessDenied as e:
+                print('Access denied to process (PID={}), skipping...'.format(e.pid))
+                next(iter)
+                continue
+
+        # Occurs once all processes have been checked (i.e. after "except StopIteration:")
+        print('All processes checked, no supported game found...')
+        print('Please launch a supported game!')
+        time.sleep(15)
+        return self.currentGame()
+
+        #print('Unspecified issue detecting the current game, trying again.')
+        #return self.currentGame()
 
     def findNew(self, game):
         """Find most recently updated file"""
