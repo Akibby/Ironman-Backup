@@ -6,13 +6,12 @@ import time
 import threading
 from backup import Backup
 from threading import Event
-from PyQt5.QtWidgets import QApplication, QLineEdit, QTextEdit, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QMainWindow, QAction, QInputDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QFileDialog, QLineEdit, QTextEdit, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QMainWindow, QAction, QInputDialog, QMessageBox
 from PyQt5.QtGui import QIcon
 
 
 class App(QMainWindow):
     """Main window class"""
-
     def __init__(self, backup):
         super().__init__()
 
@@ -93,7 +92,7 @@ class App(QMainWindow):
     def writeText(self):
         """Write text to screen"""
         while not self.exit.is_set():
-            message = self.backup.startup()
+            message = self.backup.startup(self.cwd)
             self.text.append(message)
             app.processEvents()
             if self.isRunning:
@@ -112,7 +111,7 @@ class App(QMainWindow):
     def setTimer(self):
         """Set the time interval for saves"""
         newTime, i = QInputDialog.getInt(
-            self, "New Timer", "Enter a time in minutes", (self.timer/60), 1, 60, 1)
+            self, "New Timer", "Enter a time in minutes", int(self.timer/60), 1, 60, 1)
         if i:
             if self.timer != (newTime * 60):
                 self.timer = (newTime * 60)
@@ -122,13 +121,11 @@ class App(QMainWindow):
                     self.ssBtn.click()
 
     def setDirectory(self):
-        """Set the current working directory."""
-        newDir, i = QInputDialog.getText(
-            self, "Current Working Directory", "", QLineEdit.Normal, self.cwd)
-        if i:
-            if self.cwd != newDir:
-                self.cwd = newDir
-                if self.isRunning:
+        """Set a custom game install directory."""
+        newDir = QFileDialog.getExistingDirectory(self, "Select your Paradox Interactive folder", options=QFileDialog.ShowDirsOnly).replace('/', '\\') + '\\' # For consistency
+        if self.cwd != newDir:
+            self.cwd = newDir
+            if self.isRunning:
                     self.ssBtn.click()
                     time.sleep(.5)
                     self.ssBtn.click()
@@ -136,7 +133,7 @@ class App(QMainWindow):
     def loadLast(self):
         """Load the latest backup save for the current game"""
         self.curGame = self.backup.currentGame()
-        if self.curGame == 'Issue detecting the game, trying again.':
+        if self.curGame == '':
             self.loadLast()
         elif self.curGame == 'Stellaris':
             runList = self.backup.loadList(self.curGame)
@@ -162,14 +159,13 @@ class App(QMainWindow):
                     return
         else:
             QMessageBox.warning(self, 'Load Last',
-                                'A game must be running to use this feature.')
+                                'A supported game must be running to use this feature.')
             return
         QMessageBox.warning(self, 'Load Last', self.curGame + ' has no backups.')
 
 
 class LoadWindow(QWidget):
     """Load window class"""
-
     def __init__(self, backup, curGame):
         QWidget.__init__(self)
         self.backup = backup

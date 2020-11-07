@@ -9,36 +9,40 @@ import psutil
 import shutil
 import datetime
 
-from psutil import Process
-
 class Backup():
     """Generates backups"""
-
     def __init__(self):
         self.location = os.path.expanduser('~\\Documents\\Paradox Interactive\\')    # Location of the Paradox Interactive folder
-        self.backupLocation = self.location + 'Ironman Backup\\'                     # Location of backup folder
+        self.backupLocation = self.location + 'Ironman Backup\\'                     # Location of backup folder --TODO: Make customizable.
         self.euSuffix = '_Backup'                                                    # To ignore _Backup eu4 files
         self.hoiTemp = '_temp'                                                       # To ignore _temp hoi4 files
 
-        print('Working in directory ' + self.location)
+        print('Defaulted to working in directory ' + self.location)
+        print('If this is not desired, set a working directory in the File menu before pressing start.')
 
-    def startup(self):
-        """Finds game to be saved"""
+    def startup(self, dir=''):
+        """Finds game to be saved."""
         message = ''
         game = self.currentGame()
-        print(game)
+
+        """Sets custom working directory."""
+        if dir != '':
+            self.location = dir
+            self.backupLocation = self.location + 'Ironman Backup\\'
+            print('Working in directory ' + self.location)
+            message += 'Working in directory ' + self.location + '\n'
 
         if not os.path.isdir(self.backupLocation + '\\' + game):
             print('Making ' + self.backupLocation + game)
-            os.makedirs(self.backupLocation + '\\' + game)
             message += 'Making ' + self.backupLocation + game + '\n'
+            os.makedirs(self.backupLocation + '\\' + game)
 
         if game == 'Stellaris':
             message += self.stellarisSave()
         elif os.path.exists(self.location + game + '\\save games'):
             message += self.genSave(game)
         else:
-            message += 'Please launch a game!'
+            message = 'Please launch a supported game!'
         return message
 
     def genSave(self, game):
