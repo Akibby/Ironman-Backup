@@ -112,37 +112,37 @@ class Backup():
     def currentGame(self):
         """Find which game is currently running."""
          # According to psutils docs, this is a preferable method.
-        iter = psutil.process_iter()
-        for proc in iter:
-            try:
-                if proc.name() == 'stellaris.exe':
-                    return "Stellaris"
-                elif proc.name() == 'eu4.exe':
-                    return 'Europa Universalis IV'
-                elif proc.name() == 'ck3.exe':
-                    return 'Crusader Kings III'
-                elif proc.name() == 'CK2game.exe':
-                    return 'Crusader Kings II'
-                elif proc.name() == 'hoi4.exe':
-                    return 'Hearts of Iron IV'
-                elif proc.name() == 'imperator.exe':
-                    return 'Imperator'
-                elif proc.name() == 'victoria2.exe' or proc.name() == 'v2game.exe':
-                    return 'Victoria II'
-                continue
-            except psutil.AccessDenied as e:
-                print('Access denied to process (PID={}), skipping...'.format(e.pid))
-                next(iter)
-                continue
+        try:
+            iter = psutil.process_iter()
+            for proc in iter:
+                try:
+                    if proc.name() == 'stellaris.exe':
+                        return "Stellaris"
+                    elif proc.name() == 'eu4.exe':
+                        return 'Europa Universalis IV'
+                    elif proc.name() == 'ck3.exe':
+                        return 'Crusader Kings III'
+                    elif proc.name() == 'CK2game.exe':
+                        return 'Crusader Kings II'
+                    elif proc.name() == 'hoi4.exe':
+                        return 'Hearts of Iron IV'
+                    elif proc.name() == 'imperator.exe':
+                        return 'Imperator'
+                    elif proc.name() == 'victoria2.exe' or proc.name() == 'v2game.exe':
+                        return 'Victoria II'
+                    continue
+                except psutil.AccessDenied as e:
+                    print('Access denied to process (PID={}), skipping...'.format(e.pid))
+                    next(iter)
+                    continue
 
-        # Occurs once all processes have been checked (i.e. after "except StopIteration:")
-        print('All processes checked, no supported game found...')
-        print('Please launch a supported game!')
-        time.sleep(15)
-        return self.currentGame()
-
-        #print('Unspecified issue detecting the current game, trying again.')
-        #return self.currentGame()
+            # Occurs once all processes have been checked (i.e. after "except StopIteration:")
+            print('All processes checked, no supported game found...')
+            print('Please launch a supported game!')
+            return ''
+        except:
+            print('Unspecified issue detecting the current game, trying again.')
+            return self.currentGame()
 
     def findNew(self, game):
         """Find most recently updated file"""

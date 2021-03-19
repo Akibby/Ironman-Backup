@@ -133,9 +133,7 @@ class App(QMainWindow):
     def loadLast(self):
         """Load the latest backup save for the current game"""
         self.curGame = self.backup.currentGame()
-        if self.curGame == '':
-            self.loadLast()
-        elif self.curGame == 'Stellaris':
+        if self.curGame == 'Stellaris':
             runList = self.backup.loadList(self.curGame)
             if runList:
                 run = runList[0]
