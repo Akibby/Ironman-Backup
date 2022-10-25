@@ -130,6 +130,8 @@ class Backup():
                         return 'Imperator'
                     elif proc.name() == 'victoria2.exe' or proc.name() == 'v2game.exe':
                         return 'Victoria II'
+                    elif proc.name() == 'victoria3.exe' or proc.name() == 'v2game.exe':
+                        return 'Victoria 3'
                     continue
                 except psutil.AccessDenied as e:
                     print('Access denied to process (PID={}), skipping...'.format(e.pid))
@@ -173,6 +175,8 @@ class Backup():
             return '.rome'
         elif game == 'Victoria II':
             return '.v2'
+        elif game == 'Victoria 3':
+            return '.v3'
         else:
             print("I haven't played this game before!")
             return ''
